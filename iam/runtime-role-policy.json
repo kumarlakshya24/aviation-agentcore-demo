@@ -1,0 +1,48 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PullMcpImage",
+      "Effect": "Allow",
+      "Action": ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"],
+      "Resource": "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/${ECR_REPO}"
+    },
+    {
+      "Sid": "EcrAuthTokenHasNoResourceLevelPermissions",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "RuntimeLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"],
+      "Resource": "arn:aws:logs:${AWS_REGION}:${ACCOUNT_ID}:log-group:/aws/bedrock-agentcore/runtimes/*"
+    },
+    {
+      "Sid": "ReadOnlyToolsWithoutResourceLevelPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:GetMetricStatistics",
+        "ec2:DescribeInstances",
+        "s3:ListAllMyBuckets",
+        "ce:GetCostAndUsage"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcsListScopedToCluster",
+      "Effect": "Allow",
+      "Action": "ecs:ListServices",
+      "Resource": "*",
+      "Condition": { "ArnEquals": { "ecs:cluster": "arn:aws:ecs:${AWS_REGION}:${ACCOUNT_ID}:cluster/${ECS_CLUSTER}" } }
+    },
+    {
+      "Sid": "EcsServicesInDemoClusterOnly",
+      "Effect": "Allow",
+      "Action": ["ecs:DescribeServices", "ecs:UpdateService"],
+      "Resource": "arn:aws:ecs:${AWS_REGION}:${ACCOUNT_ID}:service/${ECS_CLUSTER}/*"
+    }
+  ]
+}
